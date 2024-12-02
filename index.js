@@ -81,7 +81,7 @@ io.on('connection', function(socket){
         socket.to(socket.room).emit('updateusers', usernames);
     })
 })
-const uri = "mongodb+srv://majba:di01xKA8wj5wYSk1@cluster0.tanzz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = "use your mongodb account link";
 console.log(uri);
 async function run() {
     const client = new MongoClient(uri);
