@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cart: E-Commerce</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        padding: 20px;
+      }
+      .header-links a {
+        text-decoration: none;
+        margin: 0 10px;
+        font-weight: bold;
+        color: #000;
+      }
+      #form {
+        margin-bottom: 20px;
+      }
+      #products img {
+        width: 80px;
+      }
+      .table {
+        margin-top: 20px;
+      }
+      #btnSubmit {
+        background-color: #007bff;
+        color: white;
+      }
+      .needs-validation input:valid {
+        border-color: #28a745;
+      }
+      .needs-validation input:invalid {
+        border-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="d-flex justify-content-center py-3 border-bottom">
+      <div class="header-links">
+        <a href="home">Home</a> | <a href="chat">Chat</a> |
+        <a href="cart">Cart (<span id="productsCountInCart"></span>)</a>
+      </div>
+    </header>
+
+    <h1 class="text-center my-4">Cart</h1>
+
+    <!-- Form for customer details with Bootstrap validation -->
+    <form id="form" class="needs-validation" novalidate>
+      <div class="mb-3">
+        <label for="name" class="form-label">Name :</label>
+        <input
+          type="text"
+          id="name"
+          class="form-control"
+          placeholder="Your name"
+          required
+        />
+        <div class="invalid-feedback">Please enter your name.</div>
+      </div>
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone :</label>
+        <input
+          type="text"
+          id="phone"
+          class="form-control"
+          placeholder="Your phone number"
+          required
+        />
+        <div class="invalid-feedback">Please enter your phone number.</div>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">E-Mail :</label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          placeholder="Your email address"
+          required
+        />
+        <div class="invalid-feedback">Please enter a valid email address.</div>
+      </div>
+      <div class="mb-3">
+        <label for="address" class="form-label">Address :</label>
+        <textarea
+          id="address"
+          class="form-control"
+          rows="3"
+          placeholder="Your address"
+          required
+        ></textarea>
+        <div class="invalid-feedback">Please enter your address.</div>
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="createSalesOrder();"
+        id="btnSubmit"
+      >
+        Submit
+      </button>
+    </form>
+
+    <!-- Cart table -->
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="products"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5"></td>
+          <td><strong>Grand Total:</strong></td>
+          <td id="grandTotal" style="text-align: right"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <script src="js/e-commerce.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/realm-web@1.5.1/dist/bundle.iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        countProductInCart();
+        getProductInCart();
+      });
+
+      // Bootstrap validation script
+      (function () {
+        "use strict";
+        var forms = document.querySelectorAll(".needs-validation");
+        Array.prototype.slice.call(forms).forEach(function (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        });
+      })();
+
+      function createSalesOrder() {
+        var form = document.querySelector(".needs-validation");
+        if (form.checkValidity() === false) {
+          form.classList.add("was-validated");
+          return; // Exit if form validation fails
+        }
+
+        var phone = document.getElementById("phone").value;
+
+        // Check if phone number is exactly 11 digits
+        var phonePattern = /^\d{11}$/;
+        if (!phonePattern.test(phone)) {
+          alert("Please enter a valid phone number with exactly 11 digits.");
+          return; // Exit if phone validation fails
+        }
+
+        var name = document.getElementById("name").value;
+        var email = document.getElementById("email").value;
+        var address = document.getElementById("address").value;
+        var listProduct = getItemInLocalStorage("cart");
+
+        if (!listProduct || listProduct.length === 0) {
+          alert("Please add products to the cart.");
+          return;
+        }
+
+        document.getElementById("btnSubmit").innerText = "Submitting...";
+        document.getElementById("btnSubmit").disabled = true;
+
+        var jsObject = { name, email, phone, address, products: listProduct };
+        var strJsObject = JSON.stringify(jsObject);
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            resetSales();
+            alert("Order Submitted Successfully.");
+          }
+        };
+        xhttp.open("POST", "/api/createsales", true);
+        xhttp.setRequestHeader("Content-Type", "application/json");
+        xhttp.send(strJsObject);
+      }
+
+      function resetSales() {
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("btnSubmit").innerText = "Submit";
+        document.getElementById("btnSubmit").disabled = false;
+        removeItemInLocalStorage("cart");
+        getProductInCart();
+      }
+
+      function getProductInCart() {
+        var listProduct = getItemInLocalStorage("cart");
+        if (listProduct != null) {
+          var products = "";
+          var grandTotal = 0;
+          for (var i = 0; i < listProduct.length; i++) {
+            products += `
+            <tr>
+              <td><img src="/files/${listProduct[i].path}" class="img-thumbnail"></td>
+              <td>${listProduct[i].code}</td>
+              <td>${listProduct[i].name}</td>
+              <td>${listProduct[i].price}</td>
+              <td>${listProduct[i].qty}</td>
+              <td>${listProduct[i].total}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="removeProductInCart(${i});">Remove</button></td>
+            </tr>`;
+            grandTotal += parseFloat(listProduct[i].total);
+          }
+          document.getElementById("products").innerHTML = products;
+          document.getElementById("grandTotal").innerText =
+            grandTotal.toFixed(2);
+        } else {
+          document.getElementById("products").innerHTML = "";
+          document.getElementById("grandTotal").innerText = "";
+        }
+      }
+
+      function removeProductInCart(index) {
+        if (confirm("Are sure to remove the product from cart?")) {
+          var listProduct = getItemInLocalStorage("cart");
+          if (listProduct != null && listProduct.length > 0) {
+            listProduct.splice(index, 1);
+            setItemInLocalStorage("cart", JSON.stringify(listProduct));
+            getProductInCart();
+            countProductInCart();
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

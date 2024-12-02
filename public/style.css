@@ -1,0 +1,123 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+::-webkit-scrollbar{
+    display: none;
+}
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+ 
+}
+#main{
+    width: 80%;
+    background-image: url(bg.jpg);
+background-size: cover;
+    padding: 20px;
+    border-radius: 10px;  
+}
+
+.header{
+    padding: 10px;
+    display: flex;
+    color: rgb(248, 242, 242);
+    background-color: rgba(0, 255, 0, .4);
+    border-radius: 10px;
+}
+.log{
+    width: 80px;
+    color: rgb(248, 242, 242);
+    padding: 5px 10px;
+    justify-content: center;
+    background-color: rgb(44, 160, 121);
+    border-radius: 20px;
+    margin-bottom: 65px;
+}
+span >img{
+    width: 40px;
+    height: 40px;
+    margin:0 5px;
+}
+.room{
+    margin-left: auto;
+    padding: 5px 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 65px;
+    background-color: rgb(44, 160, 121);
+    border-radius: 20px;
+}
+.user{
+    justify-content: right;
+    margin-left: auto;
+}
+
+.message-body{
+   padding-top: 20px;
+   display: flex;
+   flex-direction: column;
+   height: 500px;
+   padding: 15px;
+   overflow-y: auto;
+   position: relative;
+}
+.message {
+    padding: 10px; 
+    border-radius: 5px; 
+    margin-bottom: 30px;
+    max-width: 300px;
+    position: relative;
+    background:white;
+}
+.outgoing {
+    margin-left: auto;
+}
+
+.incoming{
+    margin-right: auto;
+}
+.message h4 {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    color:rgb(251, 247, 247);
+    font-size: 14px;
+}
+.message-form{
+    padding: 10px;
+    display: flex;
+    background-color: rgba(0, 255, 0, .4);
+    border-radius: 10px;
+    justify-content: center;
+
+}
+input{
+    width:100%;
+    border: none;
+    outline: none;
+    height: 40px;
+}
+#imageInput{
+display: none;
+}
+.clip, .btn{
+    width:40;
+    height: 40px;
+    background-color:white;
+    padding: 5px 15px;
+    cursor: pointer;
+}
+.btn{
+    margin-left: auto;
+    border-top-right-radius: 5px;
+}
+
+.uploadedImage{
+    width: 100px;
+    height:100px;
+}
+

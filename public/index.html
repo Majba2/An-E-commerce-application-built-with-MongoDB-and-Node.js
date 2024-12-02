@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        *{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+::-webkit-scrollbar{
+    display: none;
+}
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+ 
+}
+#main{
+    width: 80%;
+    background-image: url(bg.jpg);
+background-size: cover;
+    padding: 20px;
+    border-radius: 10px;  
+}
+
+.header{
+    padding: 10px;
+    display: flex;
+    color: rgb(248, 242, 242);
+    background-color: rgba(0, 255, 0, .4);
+    border-radius: 10px;
+}
+.log{
+    width: 80px;
+    color: rgb(248, 242, 242);
+    padding: 5px 10px;
+    justify-content: center;
+    background-color: rgb(44, 160, 121);
+    border-radius: 20px;
+    margin-bottom: 65px;
+}
+span >img{
+    width: 40px;
+    height: 40px;
+    margin:0 5px;
+}
+.room{
+    margin-left: auto;
+    padding: 5px 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 65px;
+    background-color: rgb(44, 160, 121);
+    border-radius: 20px;
+}
+.user{
+    justify-content: right;
+    margin-left: auto;
+}
+
+.message-body{
+   padding-top: 20px;
+   display: flex;
+   flex-direction: column;
+   height: 500px;
+   padding: 15px;
+   overflow-y: auto;
+   position: relative;
+}
+.message {
+    padding: 10px; 
+    border-radius: 5px; 
+    margin-bottom: 30px;
+    max-width: 300px;
+    position: relative;
+    background:white;
+}
+.outgoing {
+    margin-left: auto;
+}
+
+.incoming{
+    margin-right: auto;
+}
+.message h4 {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    color:rgb(251, 247, 247);
+    font-size: 14px;
+}
+.message-form{
+    padding: 10px;
+    display: flex;
+    background-color: rgba(0, 255, 0, .4);
+    border-radius: 10px;
+    justify-content: center;
+
+}
+input{
+    width:100%;
+    border: none;
+    outline: none;
+    height: 40px;
+}
+#imageInput{
+display: none;
+}
+.clip, .btn{
+    width:40;
+    height: 40px;
+    background-color:white;
+    padding: 5px 15px;
+    cursor: pointer;
+}
+.btn{
+    margin-left: auto;
+    border-top-right-radius: 5px;
+}
+
+.uploadedImage{
+    width: 100px;
+    height:100px;
+}
+
+
+    </style>
+    <title>Chat Application</title>
+</head>
+<body>
+    <section id="main">
+        <div class="header">
+            <h4 class="log">TalkTide</h4> 
+           <div class="user"></div>
+            <h5 class="room">Room Name</h5>
+        </div>
+        <div class="message-body">
+        </div>
+        <div class="message-form">
+               
+            <input type="text" name="txt-msg" value=" "> 
+            <label for="imageInput"><img src="clip.png" name="file-msg" class="clip"  />  </label>
+             <input type="file" name="fileShare" id="imageInput">
+            <img src="send.png" class="btn"    onclick="sendClick()" /> 
+        </div>
+    </section>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let userName;
+let roomName;
+const input = $("input");
+const message_body = $(".message-body");
+const classUser = $(".user");
+
+const socket = io();
+
+socket.on('connect', addUser);
+socket.on('updateusers', updateUserList);
+
+
+
+function addUser() {
+    userName =  prompt("Enter your Name!");
+    roomName =  prompt("Enter your room name!");
+
+      socket.emit('adduser', userName, roomName);
+  }
+
+input.on('keyup', function(e){
+    if(e.key === 'Enter'){
+        sendMessage(e.target.value)
+    }
+});
+
+function sendMessage(message){
+   let msg= {
+       user : userName,
+       message : message.trim()
+   }
+   
+   //Append messages
+   appendMessage(msg, 'outgoing')
+   input.val('');
+   goDown()
+
+   //send message to server 
+   socket.emit('message', msg);
+}
+
+function appendMessage(msg, type){
+
+    let newDiv = document.createElement('div');
+    let className = type;
+    newDiv.classList.add(className, 'message');
+
+    let markUp = `<h4>${msg.user}</h4>
+                <p> ${msg.message}</p>
+                `
+    newDiv.innerHTML = markUp
+    message_body.append(newDiv);
+}
+
+
+function goDown(){
+   message_body.scrollTop(message_body.height())
+   
+}
+
+function sendClick(){
+    var message = input.val();
+    sendMessage(message) 
+}
+
+// Recieve messages 
+socket.on('message', (msg) => {
+    appendMessage(msg, 'incoming')
+    goDown()
+})
+
+socket.on('greeting', (data)=>{
+    let msg= {
+        user : "Server",
+        message : "Welcome  "+ data +"! </br> you have been connected !!!. "
+    }
+    appendMessage(msg, 'incoming')
+    goDown()
+})
+
+
+function updateUserList(data) {
+	$('.user').empty();
+    $('.room').html(roomName);
+	$.each(data, function (key, value) {
+        if(key.endsWith(roomName)){
+    let newSpan = document.createElement('span');
+    let markUp = `<img src="user.png" alt="${value}"> <sub class="on_off">${value}</sub> `
+    newSpan.innerHTML = markUp
+    classUser.append(newSpan);
+
+        }
+	});
+    
+}
+
+
+$('#imageInput').on('change', function(e){
+    var file = e.originalEvent.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(evt){
+        socket.emit('uploadImage', evt.target.result , userName); //send image to server
+        sendImage(evt.target.result, userName)  
+    };
+    reader.readAsDataURL(file);
+    $('#imageInput').val('');
+    
+});
+
+function sendImage(data, name){
+    //Append messages
+    appendFile(data,  name, 'outgoing')
+    goDown()
+ 
+ }
+
+function appendFile(data, user, type){
+
+    let newDiv = document.createElement('div');
+    let className = type;
+    newDiv.classList.add(className, 'message');
+
+    let markUp = `<h4>${user}</h4>
+                <img src="${data}" class="uploadedImage" />
+                `
+    newDiv.innerHTML = markUp
+    message_body.append(newDiv);
+}
+
+
+socket.on('publishImage', (data, user)=>{  // server to browser
+    appendFile(data, user,  'incoming')
+    goDown()
+
+});
+
+    </script>
+</body>
+</html>

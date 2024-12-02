@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "express": "^4.21.1",
+    "formidable": "^3.5.1",
+    "module": "^1.2.5",
+    "mongodb": "^6.9.0",
+    "name": "^0.0.2",
+    "socket.io": "^4.8.0"
+  }
+}
