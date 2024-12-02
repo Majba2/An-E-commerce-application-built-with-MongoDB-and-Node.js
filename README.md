@@ -1,4 +1,4 @@
-Name:ShopEase
+Name:ShopEase </br>
 An e-commerce platform that integrates MongoDB and Node.js to handle product uploads and display functionality seamlessly.
 Features
 Display Products:
